@@ -31,6 +31,12 @@ jobs:
       - name: Install Capacitor assets
         run: npm install --save-dev @capacitor/assets
 
+      - name: Prepare web files
+        run: |
+          mkdir -p www
+          cp index.html www/index.html
+          cp manifest.json www/manifest.json
+
       - name: Prepare app icon
         run: |
           mkdir -p resources
