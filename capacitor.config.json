@@ -1,0 +1,8 @@
+{
+  "appId": "com.prosperai.app",
+  "appName": "PROSPER AI",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  }
+}
