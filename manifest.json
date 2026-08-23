@@ -1,0 +1,10 @@
+{
+  "name": "PROSPER AI",
+  "short_name": "PROSPER AI",
+  "description": "An intelligent AI chatbot powered by Gemini, created by Fuwa Prosper Jesufemi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0b10",
+  "theme_color": "#0b0b10",
+  "orientation": "portrait"
+}
