@@ -97,7 +97,7 @@ or private security information.
     console.error("PROSPER AI ERROR:", error);
 
     return res.status(500).json({
-      error: "PROSPER AI could not respond right now."
+      error: error.message || "Unknown Gemini error"
     });
   }
 };
