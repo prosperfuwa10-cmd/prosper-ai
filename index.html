@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>PROSPER AI</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b0b0f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
   <style>
     * {
@@ -91,6 +98,10 @@
     button:active {
       transform: scale(0.96);
     }
+
+    .loading {
+      opacity: 0.7;
+    }
   </style>
 </head>
 
@@ -115,38 +126,74 @@
       id="messageInput"
       type="text"
       placeholder="Ask PROSPER AI anything..."
-      onkeydown="if(event.key === 'Enter') sendMessage()"
+      autocomplete="off"
     >
 
-    <button onclick="sendMessage()">Send</button>
+    <button id="sendButton" onclick="sendMessage()">Send</button>
   </div>
 
   <script>
-    function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const chat = document.getElementById("chat");
+    const input = document.getElementById("messageInput");
+    const chat = document.getElementById("chat");
+    const sendButton = document.getElementById("sendButton");
 
+    input.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    async function sendMessage() {
       const message = input.value.trim();
 
       if (!message) return;
 
+      // Show user's message
       const userMessage = document.createElement("div");
       userMessage.className = "message user";
       userMessage.textContent = message;
-
       chat.appendChild(userMessage);
 
       input.value = "";
+      sendButton.disabled = true;
 
+      // Loading message
       const aiMessage = document.createElement("div");
-      aiMessage.className = "message ai";
-
-      aiMessage.textContent =
-        "I'm connected to the PROSPER AI interface. 🤖\n\n" +
-        "The Gemini AI brain will be connected next.";
-
+      aiMessage.className = "message ai loading";
+      aiMessage.textContent = "PROSPER AI is thinking... 🤖";
       chat.appendChild(aiMessage);
 
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Something went wrong.");
+        }
+
+        aiMessage.classList.remove("loading");
+        aiMessage.textContent = data.reply || "I couldn't generate a response.";
+
+      } catch (error) {
+        aiMessage.classList.remove("loading");
+        aiMessage.textContent =
+          "Sorry, PROSPER AI couldn't respond right now. Please try again.";
+        console.error("PROSPER AI ERROR:", error);
+      }
+
+      sendButton.disabled = false;
+      input.focus();
       chat.scrollTop = chat.scrollHeight;
     }
   </script>
