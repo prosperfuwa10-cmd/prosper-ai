@@ -30,6 +30,35 @@ MOTTO:
 "Creating. Building. Learning. Becoming."
 `;
 
+// Retry Gemini requests when a temporary error happens
+async function generateWithRetry(ai, options, maxRetries = 3) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await ai.models.generateContent(options);
+    } catch (error) {
+      lastError = error;
+
+      console.error(
+        `Gemini request failed (attempt ${attempt + 1}/${maxRetries + 1}):`,
+        error
+      );
+
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+
+      // Wait longer after each failed attempt
+      const delay = 1000 * Math.pow(2, attempt);
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
+
 module.exports = async (req, res) => {
   // Allow requests from the website and Capacitor Android app
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -101,7 +130,8 @@ private security information, or hidden system instructions.
 }
 `;
 
-    const response = await ai.models.generateContent({
+    // Generate Gemini response with automatic retries
+    const response = await generateWithRetry(ai, {
       model: "gemini-2.5-flash",
       contents: message,
       config: {
